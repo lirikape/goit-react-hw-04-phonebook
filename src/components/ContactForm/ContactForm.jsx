@@ -1,77 +1,66 @@
 import PropTypes from 'prop-types';
 // import { nanoid } from 'nanoid';
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './ContactForm.module.css';
 
-export class ContactForm extends React.Component {
-  state = {
-    name: '',
-    number: '',
-  };
+export const ContactForm = ({ onAddNewUser, contacts }) => {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
 
-  handleChangeInput = ({ target }) => {
-    const {name, value} = target;
+  const handleChangeInput = ({ target }) => {
+    const { name, value } = target;
 
     if (name === 'number' && !/^[0-9]*$/.test(value)) {
-        // Перевірка, чи введене значення містить лише цифри
-        return;
-      }
+      return;
+    }
 
-    this.setState({ [name]: value });
-    
+    if (name === 'name') {
+      setName(value);
+    } else if (name === 'number') {
+      setNumber(value);
+    }
   };
-  
-  handleOnClick = () => {
-    const {name, number} = this.state
+
+  const handleOnClick = () => {
     if (name.trim() === '' || number.trim() === '') {
-        return
-      }
+      return;
+    }
 
-      const isNameExists = this.props.contacts.some(
-        (contact) => contact.name === name
-      );
-  
-      if (isNameExists) {
-        alert(`Контакт з іменем "${name}" вже існує в книзі.`);
-        return;
-      }    
+    const isNameExists = contacts.some(contact => contact.name === name);
 
-    this.props.onAddNewUser({id: crypto.randomUUID(), name, number})
-    this.setState({ name: '', number: '' });
-  }
+    if (isNameExists) {
+      alert(`Контакт з іменем "${name}" вже існує в книзі.`);
+      return;
+    }
 
-  render() {
-    const {name, number} = this.state
-    return (
-      
-      <div className={styles.inputСontainer}>
-        <h2>Name</h2>
-        <input
-        //   type="text"
-        onChange={this.handleChangeInput}
-          name="name"
-          value={name}
-          required
-        />
-        <h2>Number</h2>
-        <input 
+    onAddNewUser({ id: crypto.randomUUID(), name, number });
+    setName('');
+    setNumber('');
+  };
+
+  return (
+    <div className={styles.inputСontainer}>
+      <h2>Name</h2>
+      <input onChange={handleChangeInput} name="name" value={name} required />
+      <h2>Number</h2>
+      <input
         className={styles.inputForm}
-        // type="tel" 
-        name="number" 
-        onChange={this.handleChangeInput}
-        value={number} 
+        name="number"
+        onChange={handleChangeInput}
+        value={number}
         pattern="[0-9]*"
-        required />
-        
-        <hr></hr>
-        <button onClick={this.handleOnClick} className={styles.addButton}>Add contact</button>
-        </div>
-    );
-  }
+        required
+      />
 
-}
+      <hr></hr>
+      <button onClick={handleOnClick} className={styles.addButton}>
+        Add contact
+      </button>
+    </div>
+  );
+};
 
 ContactForm.propTypes = {
   onAddNewUser: PropTypes.func.isRequired,
-  
+  contacts: PropTypes.array.isRequired,
 };
